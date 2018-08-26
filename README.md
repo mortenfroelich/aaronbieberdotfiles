@@ -1,3 +1,10 @@
+# Fork of Aaron Biebers Dotfies
+This is my fork of Aaron Biebers dotfiles. Mainly used to stage the parts I
+can make use of. 
+
+I found my way to his great dotfiles after watching his great talk on Evil mode
+at from the Boston Vim Meetup. <https://www.youtube.com/watch?v=JWD1Fpdd4Pc>
+
 # All Hail Dotfiles
 
 These are my UNIX-y configuration files, known colloquially as "dotfiles"
