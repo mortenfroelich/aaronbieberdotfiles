@@ -1,4 +1,4 @@
-# Fork of Aaron Biebers Dotfies
+# Fork of Aaron Biebers Dotfiles
 This is my fork of Aaron Biebers dotfiles. Mainly used to stage the parts I
 can make use of. 
 
