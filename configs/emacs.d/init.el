@@ -64,6 +64,7 @@
 (column-number-mode t)
 (setq tab-width 4)
 (setq tramp-default-method "ssh")
+(setq tramp-syntax 'simplified)
 
 ;; Allow confusing functions
 (put 'narrow-to-region 'disabled nil)
@@ -172,7 +173,7 @@
 (require 'init-org)
 
 ;; Just while I'm working on it.
-;;(add-to-list 'load-path (expand-file-name "octopress" user-emacs-directory))
+(add-to-list 'load-path (expand-file-name "octopress-mode" user-emacs-directory))
 (use-package octopress
   :ensure t
   :commands (octopress-status octopress-mode)
@@ -180,7 +181,10 @@
   (require 'markdown-mode)
   (add-hook 'markdown-mode-hook
             (lambda ()
-              (define-key markdown-mode-map (kbd "C-c o l") 'octopress-insert-post-url))))
+              (define-key markdown-mode-map (kbd "C-c o i") 'octopress-isolate)
+              (define-key markdown-mode-map (kbd "C-c o I") 'octopress-integrate)
+              (define-key markdown-mode-map (kbd "C-c o p") 'octopress-insert-post-url)
+              (define-key markdown-mode-map (kbd "C-c o m") 'octopress-insert-image-url))))
 
 (use-package all-the-icons
   :ensure t)
@@ -397,9 +401,10 @@ COMMAND, ARG, IGNORED are the arguments required by the variable
 
   (add-hook 'markdown-mode-hook (lambda ()
                                   (visual-line-mode t)
-                                  (yas-minor-mode t)
                                   (set-fill-column 80)
                                   (turn-on-auto-fill)
+                                  ;; Don't wrap Liquid tags
+                                  (setq-local auto-fill-inhibit-regexp "{% [a-zA-Z]+")
                                   (flyspell-mode))))
 
 (use-package php-extras :ensure t :defer t)
@@ -463,7 +468,7 @@ COMMAND, ARG, IGNORED are the arguments required by the variable
                                yas-dropdown-prompt))
   (define-key yas-minor-mode-map (kbd "<escape>") 'yas-exit-snippet))
 
-(use-package 'yasnippet-snippets
+(use-package yasnippet-snippets
   :ensure t)
 
 (use-package which-key
@@ -527,6 +532,9 @@ COMMAND, ARG, IGNORED are the arguments required by the variable
   (setq undo-tree-auto-save-history t)
   (setq undo-tree-history-directory-alist
         (list (cons "." (expand-file-name "undo-tree-history" user-emacs-directory)))))
+
+(use-package atomic-chrome
+  :ensure t)
 
 ;;; Helpers for GNUPG, which I use for encrypting/decrypting secrets.
 (require 'epa-file)
@@ -774,8 +782,10 @@ is the buffer location at which the function was found."
   (setq sml/theme 'dark)
   (sml/setup))
 
-(setq server-socket-dir (expand-file-name "server" user-emacs-directory))
 (server-start)
+
+(and (fboundp 'atomic-chrome-start-server)
+  (atomic-chrome-start-server))
 
 (provide 'init)
 ;;; init.el ends here

@@ -119,9 +119,9 @@ the headlines."
 (defun air-org-helm-headings ()
   "Call `helm-org-agenda-files-headings' with a longer list of files."
   (interactive)
-  (let ((org-agenda-files '((expand-file-name "gtd/inbox.org" org-directory)
-                            (expand-file-name "gtd/team.org" org-directory)
-                            (expand-file-name "notes.org" org-directory))))
+  (let ((org-agenda-files (list (expand-file-name "gtd/inbox.org" org-directory)
+                                (expand-file-name "gtd/team.org" org-directory)
+                                (expand-file-name "notes.org" org-directory))))
     (call-interactively 'helm-org-agenda-files-headings)))
 
 (defun air--org-display-tag (tag &optional focus)
@@ -590,11 +590,12 @@ TAG is chosen interactively from the global tags completion table."
 
   ;; Agenda configuration
   (setq org-agenda-text-search-extra-files '(agenda-archives))
-  (setq org-agenda-files '((expand-file-name "gtd/inbox.org" org-directory)
-                           (expand-file-name "gtd/team.org" org-directory)))
-  (setq org-refile-targets '(((expand-file-name "gtd/inbox.org" org-directory) :maxlevel . 1)
-                             ((expand-file-name "gtd/someday.org" org-directory) :maxlevel . 1)
-                             ((expand-file-name "gtd/tickler.org" org-directory) :maxlevel . 1)))
+  (setq org-agenda-files (list (expand-file-name "gtd/inbox.org" org-directory)
+                               (expand-file-name "gtd/team.org" org-directory)))
+  (setq org-refile-targets `((,(expand-file-name "notes.org" org-directory) :maxlevel . 1)
+                             (,(expand-file-name "gtd/inbox.org" org-directory) :maxlevel . 1)
+                             (,(expand-file-name "gtd/someday.org" org-directory) :maxlevel . 1)
+                             (,(expand-file-name "gtd/tickler.org" org-directory) :maxlevel . 1)))
   (setq org-refile-use-outline-path 'file)
   (setq org-refile-allow-creating-parent-nodes 'confirm)
   (setq org-outline-path-complete-in-steps nil)
@@ -610,23 +611,23 @@ TAG is chosen interactively from the global tags completion table."
   (setq org-agenda-custom-commands
         '(("d" "GTD immediate tasks"
            ((todo "TODO"
-                       ((org-agenda-skip-function '(or (air-org-skip-if-habit)
-                                                       (org-agenda-skip-if nil '(scheduled
-                                                                                 deadline))))
-                        (org-agenda-overriding-header "Immediate tasks")
-                        (org-agenda-files '((expand-file-name "gtd/inbox.org" org-directory)
-                                            (expand-file-name "notes.org" org-directory)))))
+                  ((org-agenda-skip-function '(or (air-org-skip-if-habit)
+                                                  (org-agenda-skip-if nil '(scheduled
+                                                                            deadline))))
+                   (org-agenda-overriding-header "Immediate tasks")
+                   (org-agenda-files (list (expand-file-name "gtd/inbox.org" org-directory)
+                                           (expand-file-name "notes.org" org-directory)))))
             (todo "WAITING"
                   ((org-agenda-skip-function 'air-org-skip-if-habit)
                    (org-agenda-overriding-header "Waiting for")
-                   (org-agenda-files '((expand-file-name "gtd/inbox.org" org-directory)))))
+                   (org-agenda-files (list (expand-file-name "gtd/inbox.org" org-directory)))))
             (agenda ""
                     ((org-agenda-span 1)
                      (org-agenda-use-time-grid nil)
-                     (org-agenda-files '((expand-file-name "gtd/inbox.org" org-directory)
-                                         (expand-file-name "gtd/team.org" org-directory)
-                                         (expand-file-name "gtd/tickler.org" org-directory)
-                                         (expand-file-name "diary.org" org-directory))))))
+                     (org-agenda-files (list (expand-file-name "gtd/inbox.org" org-directory)
+                                             (expand-file-name "gtd/team.org" org-directory)
+                                             (expand-file-name "gtd/tickler.org" org-directory)
+                                             (expand-file-name "diary.org" org-directory))))))
            ((org-agenda-compact-blocks t)))
 
           ("h" "Home/personal tasks"
@@ -634,38 +635,38 @@ TAG is chosen interactively from the global tags completion table."
                        ((org-agenda-skip-function '(or (air-org-skip-if-habit)
                                                        (org-agenda-skip-if nil '(scheduled))))
                         (org-agenda-overriding-header "Immediate tasks")
-                        (org-agenda-files '((expand-file-name "personal/inbox.org" org-directory)))))))
+                        (org-agenda-files (list (expand-file-name "personal/inbox.org" org-directory)))))))
 
           ("r" "Inbox review"
            ((agenda "" ((org-agenda-span 8)
-                        (org-agenda-files '((expand-file-name "gtd/inbox.org" org-directory)))))
+                        (org-agenda-files (list (expand-file-name "gtd/inbox.org" org-directory)))))
             (stuck "" ((org-stuck-projects
                         '("+LEVEL=1/-DONE-CANCELED"
                           ("TODO" "WAITING" "SOMEDAY") nil ""))
                        (org-agenda-overriding-header (concat "Stuck projects and new items"
                                                              (make-string 72 ?-)))
-                       (org-agenda-files '((expand-file-name "gtd/inbox.org" org-directory)))))
+                       (org-agenda-files (list (expand-file-name "gtd/inbox.org" org-directory)))))
             (todo "SOMEDAY"
                   ((org-agenda-overriding-header (concat "Maybe someday is today... "
                                                          (make-string 74 ?-)))))
-            (todo "" ((org-agenda-files '((expand-file-name "gtd/reading.org" org-directory)))
+            (todo "" ((org-agenda-files (list (expand-file-name "gtd/reading.org" org-directory)))
                       (org-agenda-overriding-header (concat "Reading list "
                                                             (make-string 87 ?-))))))
            ((org-agenda-compact-blocks t)))
 
           ("e" "Personal inbox review"
            ((agenda "" ((org-agenda-span 8)
-                        (org-agenda-files '((expand-file-name "personal/inbox.org" org-directory)))))
+                        (org-agenda-files (list (expand-file-name "personal/inbox.org" org-directory)))))
             (stuck "" ((org-stuck-projects
                         '("+LEVEL=1/-DONE-CANCELED"
                           ("TODO" "WAITING" "SOMEDAY") nil ""))
                        (org-agenda-overriding-header (concat "Stuck projects and new items"
                                                              (make-string 72 ?-)))
-                       (org-agenda-files '((expand-file-name "personal/inbox.org" org-directory)))))
+                       (org-agenda-files (list (expand-file-name "personal/inbox.org" org-directory)))))
             (todo "SOMEDAY"
                   ((org-agenda-overriding-header (concat "Maybe someday is today... "
                                                          (make-string 74 ?-)))
-                   (org-agenda-files '((expand-file-name "personal/inbox.org" org-directory))))))
+                   (org-agenda-files (list (expand-file-name "personal/inbox.org" org-directory))))))
            ((org-agenda-compact-blocks t)))))
 
   (add-to-list 'org-structure-template-alist
