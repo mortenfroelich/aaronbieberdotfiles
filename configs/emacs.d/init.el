@@ -7,6 +7,10 @@
 ;;
 ;;; Code:
 
+(set-language-environment 'utf-8)
+(setq locale-coding-system 'utf-8)
+(set-default-coding-systems 'utf-8)
+(prefer-coding-system 'utf-8)
 
 ;; Leave this here, or package.el will just add it again.
 (package-initialize)
@@ -17,7 +21,7 @@
 
 ;; Also add all directories within "lisp"
 ;; I use this for packages I'm actively working on, mostly.
-(let ((files (directory-files-and-attributes "~/.emacs.d/lisp" t)))
+(let ((files (directory-files-and-attributes (expand-file-name "lisp" user-emacs-directory) t)))
   (dolist (file files)
     (let ((filename (car file))
           (dir (nth 1 file)))
@@ -64,6 +68,7 @@
 (column-number-mode t)
 (setq tab-width 4)
 (setq tramp-default-method "ssh")
+(setq tramp-syntax 'simplified)
 
 ;; Allow confusing functions
 (put 'narrow-to-region 'disabled nil)
@@ -122,9 +127,9 @@
                             (?m "Managers"  air-org-display-managers)
                             (?e "Engineers" air-org-display-engineers))))
           ("org-agendas"  ("Org Agenda Views"
-                           ((?a "All"         air-pop-to-org-agenda-default)
-                            (?r "Review"      air-pop-to-org-agenda-review)
-                            (?h "Home"        air-pop-to-org-agenda-home)
+                           ((?a "All"    air-pop-to-org-agenda-default)
+                            (?r "Review" air-pop-to-org-agenda-review)
+                            (?h "Home"   air-pop-to-org-agenda-home)
                             )))
           ("org-links"    ("Org Links"
                            ((?c "Capture"      org-store-link)
@@ -132,18 +137,12 @@
                             (?L "Insert any"   org-insert-link)
                             (?i "Custom ID"    air-org-insert-custom-id-link))))
           ("org-files"    ("Org Files"
-                           ((?t "TODO"     (lambda () (air-pop-to-org-todo nil)))
-                            (?n "Notes"    (lambda () (interactive) (air-pop-to-org-notes nil)))
+                           ((?t "TODO"  (lambda () (air-pop-to-org-todo nil)))
+                            (?n "Notes" (lambda () (interactive) (air-pop-to-org-notes nil)))
                             (?v "Vault" (lambda () (interactive) (air-pop-to-org-vault nil))))))
           ("org-captures" ("Org Captures"
-                           ((?c "Task/idea" air-org-task-capture)
-                            (?t "Tickler"   air-org-tickler-capture)
-                            (?n "Note"      (lambda () (interactive) (org-capture nil "n"))))))
-          ("org-personal-captures" ("Org Personal Captures"
-                                    ((?c "Task/idea" (lambda () (interactive (org-capture nil "h"))))
-                                     (?n "Note" (lambda () (interactive (org-capture nil "o")))))))
-
-          )))
+                           ((?c "Task"          (lambda () (interactive) (org-capture nil "c")))
+                            (?p "Personal task" (lambda () (interactive) (org-capture nil "p")))))))))
 
 ;;; Larger package-specific configurations.
 (require 'init-fonts)
@@ -172,7 +171,7 @@
 (require 'init-org)
 
 ;; Just while I'm working on it.
-;;(add-to-list 'load-path (expand-file-name "octopress" user-emacs-directory))
+(add-to-list 'load-path (expand-file-name "octopress-mode" user-emacs-directory))
 (use-package octopress
   :ensure t
   :commands (octopress-status octopress-mode)
@@ -180,7 +179,7 @@
   (require 'markdown-mode)
   (add-hook 'markdown-mode-hook
             (lambda ()
-              (define-key markdown-mode-map (kbd "C-c o l") 'octopress-insert-post-url))))
+              (octopress-minor-mode t))))
 
 (use-package all-the-icons
   :ensure t)
@@ -218,12 +217,6 @@
 
 (eval-after-load 'wdired
   (add-hook 'wdired-mode-hook 'evil-normal-state))
-
-(use-package exec-path-from-shell
-  :ensure t
-  :config
-  (exec-path-from-shell-initialize)
-  (exec-path-from-shell-copy-env "GOPATH"))
 
 (use-package elpy
   :ensure t
@@ -320,8 +313,13 @@
   (setq helm-buffers-fuzzy-matching t)
   (setq helm-autoresize-mode t)
   (setq helm-buffer-max-length 40)
-  (define-key helm-map (kbd "S-SPC") 'helm-toggle-visible-mark)
-  (define-key helm-find-files-map (kbd "C-k") 'helm-find-files-up-one-level))
+  (define-key helm-map (kbd "S-SPC")          'helm-toggle-visible-mark)
+  (define-key helm-find-files-map (kbd "C-k") 'helm-find-files-up-one-level)
+  (define-key helm-read-file-map (kbd "C-k")  'helm-find-files-up-one-level))
+
+(use-package helm-org
+  :ensure t
+  :commands helm-org-agenda-files-headings)
 
 (use-package company
   :ensure t
@@ -386,20 +384,21 @@ COMMAND, ARG, IGNORED are the arguments required by the variable
   :mode "\\.md\\'"
   :config
   (setq markdown-command "pandoc --from markdown_github-hard_line_breaks --to html")
-  (define-key markdown-mode-map (kbd "C-\\")  'markdown-insert-list-item)
-  (define-key markdown-mode-map (kbd "C-c '") 'fence-edit-code-at-point)
-  (define-key markdown-mode-map (kbd "C-c 1") 'markdown-insert-header-atx-1)
-  (define-key markdown-mode-map (kbd "C-c 2") 'markdown-insert-header-atx-2)
-  (define-key markdown-mode-map (kbd "C-c 3") 'markdown-insert-header-atx-3)
-  (define-key markdown-mode-map (kbd "C-c 4") 'markdown-insert-header-atx-4)
-  (define-key markdown-mode-map (kbd "C-c 5") 'markdown-insert-header-atx-5)
-  (define-key markdown-mode-map (kbd "C-c 6") 'markdown-insert-header-atx-6)
+  (define-key markdown-mode-map (kbd "<C-return>") 'markdown-insert-list-item)
+  (define-key markdown-mode-map (kbd "C-c '")      'fence-edit-code-at-point)
+  (define-key markdown-mode-map (kbd "C-c 1")      'markdown-insert-header-atx-1)
+  (define-key markdown-mode-map (kbd "C-c 2")      'markdown-insert-header-atx-2)
+  (define-key markdown-mode-map (kbd "C-c 3")      'markdown-insert-header-atx-3)
+  (define-key markdown-mode-map (kbd "C-c 4")      'markdown-insert-header-atx-4)
+  (define-key markdown-mode-map (kbd "C-c 5")      'markdown-insert-header-atx-5)
+  (define-key markdown-mode-map (kbd "C-c 6")      'markdown-insert-header-atx-6)
 
   (add-hook 'markdown-mode-hook (lambda ()
                                   (visual-line-mode t)
-                                  (yas-minor-mode t)
                                   (set-fill-column 80)
                                   (turn-on-auto-fill)
+                                  ;; Don't wrap Liquid tags
+                                  (setq-local auto-fill-inhibit-regexp "{% [a-zA-Z]+")
                                   (flyspell-mode))))
 
 (use-package php-extras :ensure t :defer t)
@@ -442,8 +441,6 @@ COMMAND, ARG, IGNORED are the arguments required by the variable
   (setq web-mode-markup-indent-offset 2)
   (setq web-mode-sql-indent-offset 2))
 
-(use-package sublime-themes :ensure t)
-(use-package gruvbox-theme :ensure t)
 (use-package color-theme-sanityinc-tomorrow :ensure t)
 (use-package zenburn-theme :ensure t :defer t)
 
@@ -463,7 +460,7 @@ COMMAND, ARG, IGNORED are the arguments required by the variable
                                yas-dropdown-prompt))
   (define-key yas-minor-mode-map (kbd "<escape>") 'yas-exit-snippet))
 
-(use-package 'yasnippet-snippets
+(use-package yasnippet-snippets
   :ensure t)
 
 (use-package which-key
@@ -527,6 +524,14 @@ COMMAND, ARG, IGNORED are the arguments required by the variable
   (setq undo-tree-auto-save-history t)
   (setq undo-tree-history-directory-alist
         (list (cons "." (expand-file-name "undo-tree-history" user-emacs-directory)))))
+
+(use-package atomic-chrome
+  :ensure t
+  :config
+  (setq atomic-chrome-default-major-mode 'markdown-mode)
+  (add-hook 'atomic-chrome-edit-mode-hook (lambda ()
+                                            (turn-off-auto-fill)
+                                            (visual-fill-column-mode t))))
 
 ;;; Helpers for GNUPG, which I use for encrypting/decrypting secrets.
 (require 'epa-file)
@@ -765,8 +770,10 @@ is the buffer location at which the function was found."
 (when (memq window-system '(mac ns))
   (setq ns-use-srgb-colorspace nil))
 
-(load-theme 'sanityinc-tomorrow-day)
-(load-theme 'sanityinc-tomorrow-day-overrides)
+(use-package gruvbox-theme
+  :ensure t
+  :config
+  (load-theme 'gruvbox))
 
 (use-package smart-mode-line
   :ensure t
@@ -774,8 +781,10 @@ is the buffer location at which the function was found."
   (setq sml/theme 'dark)
   (sml/setup))
 
-(setq server-socket-dir (expand-file-name "server" user-emacs-directory))
 (server-start)
+
+(and (fboundp 'atomic-chrome-start-server)
+  (atomic-chrome-start-server))
 
 (provide 'init)
 ;;; init.el ends here

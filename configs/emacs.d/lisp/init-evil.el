@@ -21,7 +21,7 @@
     "h"  'fontify-and-browse    ;; HTML-ize the buffer and browse the result
     "l"  'whitespace-mode       ;; Show invisible characters
     "nn" 'air-narrow-dwim       ;; Narrow to region and enter normal mode
-    "nw" 'widen
+    "nw" 'air-org-narrow-to-prose-dwim
     "o"  'delete-other-windows  ;; C-w o
     "p"  'helm-show-kill-ring
     "s"  'ag-project            ;; Ag search from project's root
@@ -104,6 +104,8 @@
   (evil-define-key 'normal global-map (kbd "\\ c")    (tiny-menu-run-item "org-captures"))
   (evil-define-key 'normal global-map (kbd "\\ h")    (tiny-menu-run-item "org-personal-captures"))
   (evil-define-key 'normal global-map (kbd "\\ l")    (tiny-menu-run-item "org-links"))
+  (evil-define-key 'normal global-map (kbd "C-=")     'sanityinc/increase-default-font-height)
+  (evil-define-key 'normal global-map (kbd "C--")     'sanityinc/decrease-default-font-height)
 
   (defun minibuffer-keyboard-quit ()
     "Abort recursive edit.

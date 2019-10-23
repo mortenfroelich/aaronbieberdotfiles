@@ -1,0 +1,23 @@
+\mode<presentation>
+
+\usepackage{helvet}
+
+\newcommand{\wfrule}[1]{
+  \textcolor{#1}{\noindent\makebox[\linewidth]{\rule{\textwidth}{0.5pt}}}
+}
+
+\useinnertheme{hubspot}
+\useoutertheme{hubspot}
+\usecolortheme{hubspot}
+
+\AtBeginSection{
+  \begin{frame}
+    \vfill
+    \centering
+    \usebeamerfont{subtitle}\insertsectionhead\par
+    \textcolor{hs-orange}{\rule{0.75\textwidth}{.4pt}}
+    \vfill
+  \end{frame}
+}
+
+\mode<all>
